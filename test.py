@@ -36,7 +36,6 @@ def train(epoch, data_loader):
 def validate(epoch, data_loader):  # da vedere se ha senso
     model.eval()
     val_loss, correct = 0, 0
-    count=0
 #    for batch_idx, (data, target) in enumerate(data_loader):
 #        data, target = Variable(data), Variable(target)
 #        optimizer.zero_grad()
@@ -48,9 +47,6 @@ def validate(epoch, data_loader):  # da vedere se ha senso
 #            print('Validation Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
 #                epoch + 1, batch_idx * len(data), len(data_loader.dataset),
 #                100. * batch_idx / len(data_loader), loss.data.item()))
-    for i in enumerate(validation_loader,0):
-        count+=1
-
     for batch_idx, (data, target) in enumerate(data_loader):
         data, target = Variable(data), Variable(target)
         output = model(data)
@@ -59,16 +55,16 @@ def validate(epoch, data_loader):  # da vedere se ha senso
         correct += pred.eq(target.data).cpu().sum()
         if batch_idx % 10 == 0:
             print('Validation Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                        epoch + 1, batch_idx * len(data), count*batch_size,
+                        epoch + 1, batch_idx * len(data), len(data_loader)*batch_size,
                         100. * batch_idx / (len(data_loader)), val_loss))
-    val_loss /= count*batch_size
+    val_loss /= len(data_loader)*batch_size
     #loss_vector.append(val_loss)
-    #qui la len del dataset mi prende 60000 ma il dataloader dovrebbe essere 5000
-    accuracy = 100. * correct / (count*batch_size)
+    #qui la len del dataset mi prende 60000 ma il dataloader dovrebbe essere 5000 -RISOLTO
+    accuracy = 100. * correct / (len(data_loader)*batch_size)
     #accuracy_vector.append(accuracy)
 
     print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        val_loss, correct, (count*batch_size), accuracy))
+        val_loss, correct, (len(data_loader)*batch_size), accuracy))
 
 
 def test(data_loader):
