@@ -15,7 +15,7 @@ model = Net()
 
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
-epochs = 3
+epochs = 5
 
 
 def train(epoch, data_loader):
