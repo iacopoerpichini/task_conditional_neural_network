@@ -45,7 +45,8 @@ class ChunkSampler(sampler.Sampler):
 
 def getMNIST(validation=False, batch_size=64, num_workers=4):
 
-    transform = transforms.ToTensor()
+    transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))])
+
 
     train_size = 60000
     if validation:
