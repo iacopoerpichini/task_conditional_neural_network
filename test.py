@@ -24,7 +24,8 @@ model = Net()
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
 epochs = 5
-num_test = 1
+
+classify_with_classes01 = True;
 
 def train(epoch, data_loader):
     model.train()
@@ -39,11 +40,10 @@ def train(epoch, data_loader):
         optimizer.step()
         if batch_idx % 10 == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-                epoch + 1, batch_idx * len(data), len(data_loader.dataset),
+                epoch + 1, batch_idx * len(data), len(data_loader)*batch_size,
                 100. * batch_idx / len(data_loader), loss.data.item()))
 
 
- # da vedere se ha senso mi sembra che vada meglio il test se lacio anche qui model.train()
 def validate(epoch, data_loader):
     # model.train()
     model.eval()
@@ -72,11 +72,8 @@ def validate(epoch, data_loader):
                         epoch + 1, batch_idx * len(data), len(data_loader)*batch_size,
                         100. * batch_idx / (len(data_loader)), val_loss))
     val_loss /= len(data_loader)*batch_size
-    #loss_vector.append(val_loss)
     #qui la len del dataset mi prende 60000 ma il dataloader dovrebbe essere 5000 -RISOLTO
     accuracy = 100. * correct / (len(data_loader)*batch_size)
-    #accuracy_vector.append(accuracy)
-
     print('\nValidation set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         val_loss, correct, (len(data_loader)*batch_size), accuracy))
 
@@ -109,6 +106,7 @@ def test(data_loader):
     # print(accuracy)
     return accuracy
 
+# DA FARE UNA FUNZIONE CHE CLASSIFICA CON GLI 0 E 1 E UNA CHE CLASSIFICA CON LE CLASSI 0,1,2,3,...,9
 
 if __name__ == '__main__':
 
@@ -118,11 +116,22 @@ if __name__ == '__main__':
 
     for epoch in range(0, epochs):
         train_loader, test_loader = utils.getMNIST(validation=False, batch_size=batch_size)
+
+        if (classify_with_classes01):
+            utils.classify_loader(train_loader, 'train')
+            utils.classify_loader(test_loader, 'test')
+
         train(epoch, data_loader=train_loader)
         accuracy.append(test(test_loader))
 
         # dividere train set 55000:5000 e fare validation set da 5000
         train_loader, validation_loader, test_loader = utils.getMNIST(validation=True, batch_size=batch_size)
+
+        if (classify_with_classes01):
+            utils.classify_loader(train_loader, 'train_val')
+            utils.classify_loader(validation_loader,'validation')
+            utils.classify_loader(test_loader, 'test')
+
         train(epoch, data_loader=train_loader)
         validate(epoch, data_loader=validation_loader)  # da vedere questa funzione se ha senso
         accuracy_validation.append(test(test_loader))
@@ -130,7 +139,7 @@ if __name__ == '__main__':
     end = timer()
     print('Execution time in minutes: {:.2f}'.format((end - start) / 60))
 
-    # print(accuracy,accuracy_validation)
+    # Stampo grafici
 
     x = np.arange(1, epochs + 1)
     plt.plot(x, accuracy, '-o', label="accuracy")
@@ -141,6 +150,4 @@ if __name__ == '__main__':
     plt.ylabel('accuracy_%')
     plt.show()
 
-
-
-#test da 5 epoche circa 6 minuti
+#test da 5 epoche circa 11 minuti

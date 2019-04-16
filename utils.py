@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 
 # SETTINGS MESSI COME PARAMETRI PASSABILI ALLE FUNZIONI ?
-# batch_size = 64
+batch_size = 64
 #     If using CUDA, num_workers should be set to 1 and pin_memory to True. trovato on line
 # num_workers = 4  # number of workers threads ?
 
@@ -46,7 +46,7 @@ class ChunkSampler(sampler.Sampler):
 def getMNIST(validation=False, batch_size=64, num_workers=4):
 
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))])
-
+    transform = transforms.ToTensor()
 
     train_size = 60000
     if validation:
@@ -58,6 +58,7 @@ def getMNIST(validation=False, batch_size=64, num_workers=4):
 
     trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=False,
                                               num_workers=num_workers, sampler=ChunkSampler(train_size, 0))
+
     testloader = torch.utils.data.DataLoader(dataset=testset, batch_size=batch_size, shuffle=False,
                                              num_workers=num_workers)
 
@@ -108,17 +109,55 @@ def testStampa(dataloader, num_img):
     plt.show()
 
 
+def classify_loader(data_loader,loader_name = 'train'):
+    dict = {
+        0: 0,
+        1: 1,
+        2: 0,
+        3: 1,
+        4: 1,
+        5: 1,
+        6: 1,
+        7: 0,
+        8: 0,
+        9: 0
+    }
+    count = 0
+
+    for (data, target) in enumerate(data_loader):
+        #print(count)
+        batch_size = 64
+        # SERIE DI IF CHE GESTISCONO LA DIMENSIONE DELL'ULTIMO BATCH QUANDO RISCRIVI LE ETICHETTE DELLE CLASSI
+        if  (loader_name=='train_val' and count == 54976):
+            batch_size = 55000 - 54976
+        if  (loader_name=='validation' and count == 4992):
+            batch_size = 5000 - 4992
+        if (loader_name=='train' and count == 59968):
+            batch_size = 60000 - 59968
+        if (loader_name=='test' and count == 9984):
+            batch_size = 10000 - 9984
+
+        for batch_idx in range(batch_size):
+            #print(target[1][batch_idx])
+            target[1][batch_idx] = dict[target[1][batch_idx].item()]
+            #target[1][batch_idx] = [target[1][batch_idx], dict[target[1][batch_idx].item()]]
+
+            count += 1
+
+
 if __name__ == '__main__':  # test di tutte le funzioni implementate
 
-    testSplitData()
-
-    num_img = 5
 
     train_loader, test_loader = getMNIST(validation=False)
-    testStampa(dataloader=train_loader, num_img=num_img)
-    testStampa(dataloader=test_loader, num_img=num_img)
+    classify_loader(train_loader)
 
-    train_loader, validation_loader, test_loader = getMNIST(validation=True)
-    testStampa(dataloader=train_loader, num_img=num_img)
-    testStampa(dataloader=validation_loader, num_img=num_img)
-    testStampa(dataloader=test_loader, num_img=num_img)
+    # num_img = 5
+    # testSplitData()
+    # train_loader, test_loader = getMNIST(validation=False)
+    # testStampa(dataloader=train_loader, num_img=num_img)
+    # testStampa(dataloader=test_loader, num_img=num_img)
+    #
+    # train_loader, validation_loader, test_loader = getMNIST(validation=True)
+    # testStampa(dataloader=train_loader, num_img=num_img)
+    # testStampa(dataloader=validation_loader, num_img=num_img)
+    # testStampa(dataloader=test_loader, num_img=num_img)
