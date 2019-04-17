@@ -4,6 +4,7 @@ import torchvision
 from torch.utils.data import sampler
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 # SETTINGS MESSI COME PARAMETRI PASSABILI ALLE FUNZIONI ?
@@ -123,7 +124,7 @@ def classify_loader(data_loader,loader_name = 'train'):
         9: 0
     }
     count = 0
-
+    y_aux = []
     for (data, target) in enumerate(data_loader):
         #print(count)
         batch_size = 64
@@ -136,14 +137,14 @@ def classify_loader(data_loader,loader_name = 'train'):
             batch_size = 60000 - 59968
         if (loader_name=='test' and count == 9984):
             batch_size = 10000 - 9984
-
         for batch_idx in range(batch_size):
             #print(target[1][batch_idx])
-            target[1][batch_idx] = dict[target[1][batch_idx].item()]
-            #target[1][batch_idx] = [target[1][batch_idx], dict[target[1][batch_idx].item()]]
-
+            #target[1][batch_idx] = dict[target[1][batch_idx].item()]
+            y_aux.append(dict[target[1][batch_idx].item()])
             count += 1
 
+    y_aux = torch.from_numpy(np.asarray(y_aux))
+    return y_aux
 
 if __name__ == '__main__':  # test di tutte le funzioni implementate
 
