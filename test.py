@@ -115,6 +115,7 @@ def test(data_loader, target_aux):
     return accuracy
 
 # DA FARE UNA FUNZIONE CHE CLASSIFICA CON GLI 0 E 1 E UNA CHE CLASSIFICA CON LE CLASSI 0,1,2,3,...,9
+# utils extract_aux_target_from_loader ---- OK
 
 if __name__ == '__main__':
 
@@ -126,8 +127,8 @@ if __name__ == '__main__':
         train_loader, test_loader = utils.getMNIST(validation=False, batch_size=batch_size)
 
         if (classify_with_classes01):  # DA MODIFICARE
-            target_aux_train = utils.classify_loader(train_loader, 'train')
-            target_aux_test = utils.classify_loader(test_loader, 'test')
+            target_aux_train = utils.extract_aux_target_from_loader(train_loader, 'train')
+            target_aux_test = utils.extract_aux_target_from_loader(test_loader, 'test')
 
 
 
@@ -138,9 +139,9 @@ if __name__ == '__main__':
         train_loader, validation_loader, test_loader = utils.getMNIST(validation=True, batch_size=batch_size)
 
         if (classify_with_classes01):
-            target_aux_train = utils.classify_loader(train_loader, 'train_val')
-            target_aux_test = utils.classify_loader(test_loader, 'test')
-            target_aux_validation = utils.classify_loader(validation_loader,'validation')
+            target_aux_train = utils.extract_aux_target_from_loader(train_loader, 'train_val')
+            target_aux_test = utils.extract_aux_target_from_loader(test_loader, 'test')
+            target_aux_validation = utils.extract_aux_target_from_loader(validation_loader,'validation')
             # print(len(target_aux_train),len(target_aux_test),len(target_aux_validation))
 
         train(epoch, data_loader=train_loader, target_aux=target_aux_train)

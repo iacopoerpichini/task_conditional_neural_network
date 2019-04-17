@@ -110,7 +110,7 @@ def testStampa(dataloader, num_img):
     plt.show()
 
 
-def classify_loader(data_loader,loader_name = 'train'):
+def extract_aux_target_from_loader(data_loader,loader_name = 'train'):
     dict = {
         0: 0,
         1: 1,
