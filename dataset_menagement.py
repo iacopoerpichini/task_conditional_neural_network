@@ -202,20 +202,21 @@ if __name__ == '__main__':
 
     # Fare vari test a console
 
-    img = trainset.__getitem__(9)[0][0].numpy().reshape(28, 28)
-    plt.imshow(img, cmap="gray")
-    plt.show()
-
     print(trainset._ds.__len__())
 
-    print(trainset.__getitem__(9)[0]) # mi restituisce l'item (img, classificazione)
-
-    img = trainset.__getitem__(234)[0][0].numpy().reshape(28, 28)
+    img = trainset.__getitem__(9)[0].numpy().reshape(28, 28)
     plt.imshow(img, cmap="gray")
     plt.show()
+    print(trainset.__getitem__(9)[0]) # mi restituisce l'item (img, classificazione)
+    # con [0] solo l'img se metto [1] il valore target con [2] il target aux
 
+    img = trainset.__getitem__(234)[0].numpy().reshape(28, 28)
+    plt.imshow(img)
+    plt.show()
     print(trainset.__getitem__(234))  # mi restituisce l'item [(img, classificazione), y_aux]
 
      # se faccio trainloader.dataset[0] mi restituisce la tripletta
     # ma se faccio trainloader.dataset._ds.__getitem__(0) non mi restituisce l'ultimo y
     #credo che si debba modificare il get item
+
+    # trainset.__getItem__(1) ok ma trainset._ds.__getItem__()
