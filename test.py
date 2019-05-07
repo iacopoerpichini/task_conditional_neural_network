@@ -8,15 +8,15 @@ import utils
 import matplotlib.pyplot as plt
 import numpy as np
 from timeit import default_timer as timer
-import torchvision.transforms as transforms
 
-#import seaborn as sns
+# import seaborn as sns
 
 cuda = torch.cuda.is_available()
 print('Using PyTorch version:', torch.__version__, 'CUDA:', cuda)
 
 
 # Training settings !----------------!
+
 batch_size = 64 # Dimensione del batch
 
 model = Net()
@@ -27,17 +27,34 @@ epochs = 3 # Numero di epoche di addestramento
 
 classify_with_classes01 = True; # Classifica cambiando le etichette
 
+# End Training Settings !------------!
+
 def train(epoch, data_loader, target_aux):
     model.train()
+
     for batch_idx, (data, target) in enumerate(data_loader):
         if cuda:
             data, target = Variable(data.cuda()), Variable(target.cuda())
         data, target = Variable(data), Variable(target)
         optimizer.zero_grad()
-        # output, out_aux = model(data)
-        #loss += F.nll_loss(out_aux, y_aux)
         output, output_aux = model(data)
         loss = F.nll_loss(output, target)
+
+        # target_aux.shape = torch.Size([batch_size, len(data_loader)])
+        # length_tensor.shape = torch.Size([batch_size])
+        #
+        # main_tensor / length_tensor.view(batch_size, 1)
+        #
+        # print(output, len(output))
+        # print('-o-o-o-o-o-o-o-')
+        # print(target, len(target))
+        # print('------------------')
+        # print(output_aux, len(output_aux))
+        # print('-o-o-o-o-o-o-o-')
+        # print(target_aux, len(target_aux))
+        # print('###############')
+        # break
+
         # loss_aux = F.nll_loss(output_aux, target_aux) # COME GESTIRE y_aux
         # loss = loss + loss_aux
         loss.backward()
@@ -101,8 +118,9 @@ def test(data_loader, target_aux):
 
         # test_loss += F.nll_loss(output_aux, target_aux, reduction='sum').data.item()
 
-        # get the index of the max log-probability
-        pred = output.data.max(1, keepdim=True)[1]
+        # Gestire quante ne indovina con le etichette ausiliarie fare nuove predizioni e ritornarle
+
+        pred = output.data.max(1, keepdim=True)[1] # get the index of the max log-probability
         correct += pred.eq(target.data.view_as(pred)).cpu().sum()
 
     test_loss /= len(data_loader.dataset)
@@ -128,6 +146,9 @@ if __name__ == '__main__':
 
         if (classify_with_classes01):  # DA MODIFICARE
             target_aux_train = utils.extract_aux_target_from_loader(train_loader, 'train')
+
+            target_aux_train = torch.utils.data.DataLoader(dataset=target_aux_train, batch_size=batch_size, shuffle=False,
+                                                     num_workers=4)
             target_aux_test = utils.extract_aux_target_from_loader(test_loader, 'test')
 
 

@@ -46,6 +46,7 @@ class ChunkSampler(sampler.Sampler):
 
 def getMNIST(validation=False, batch_size=64, num_workers=4):
 
+    # Ho visto che molti su questo dataset fanno questa normalazie chiedere a bagda come mai
     transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))])
     transform = transforms.ToTensor()
 
@@ -111,7 +112,7 @@ def testStampa(dataloader, num_img):
 
 
 def extract_aux_target_from_loader(data_loader,loader_name = 'train'):
-    dict = {
+    dict = { # Classificazione ausiliaria per ora a caso
         0: 0,
         1: 1,
         2: 0,
@@ -150,15 +151,15 @@ if __name__ == '__main__':  # test di tutte le funzioni implementate
 
 
     train_loader, test_loader = getMNIST(validation=False)
-    classify_loader(train_loader)
+    extract_aux_target_from_loader(train_loader)
 
-    # num_img = 5
-    # testSplitData()
-    # train_loader, test_loader = getMNIST(validation=False)
-    # testStampa(dataloader=train_loader, num_img=num_img)
-    # testStampa(dataloader=test_loader, num_img=num_img)
-    #
-    # train_loader, validation_loader, test_loader = getMNIST(validation=True)
-    # testStampa(dataloader=train_loader, num_img=num_img)
-    # testStampa(dataloader=validation_loader, num_img=num_img)
-    # testStampa(dataloader=test_loader, num_img=num_img)
+    num_img = 5
+    testSplitData()
+    train_loader, test_loader = getMNIST(validation=False)
+    testStampa(dataloader=train_loader, num_img=num_img)
+    testStampa(dataloader=test_loader, num_img=num_img)
+
+    train_loader, validation_loader, test_loader = getMNIST(validation=True)
+    testStampa(dataloader=train_loader, num_img=num_img)
+    testStampa(dataloader=validation_loader, num_img=num_img)
+    testStampa(dataloader=test_loader, num_img=num_img)

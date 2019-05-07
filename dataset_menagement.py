@@ -24,7 +24,7 @@ dict = { # Classificazione ausiliaria per ora a caso
         9: 0
     }
 
-class Dataset(object):
+class AuxDataset(object):
     """An abstract class representing a Dataset.
 
     All other datasets should subclass it. All subclasses should override
@@ -35,11 +35,14 @@ class Dataset(object):
         self._ds = dataset
 
     def __getitem__(self, index):
-        (x, y) = self._ds[index]
+        x, y = self._ds[index]
+        # print(x)
+        # print(y)
+        y_aux = dict[y]
 
-        y_aux = dict[index]
+        # return (x,y),y_aux
+        return x,y,y_aux
 
-        return (x,y),y_aux
         raise NotImplementedError
 
     def __len__(self):
@@ -51,7 +54,7 @@ class Dataset(object):
 
 
 
-class TensorDataset(Dataset):
+class TensorDataset(AuxDataset):
     """Dataset wrapping tensors.
 
     Each sample will be retrieved by indexing tensors along the first dimension.
@@ -72,7 +75,7 @@ class TensorDataset(Dataset):
 
 
 
-class ConcatDataset(Dataset):
+class ConcatDataset(AuxDataset):
     """
     Dataset to concatenate multiple datasets.
     Purpose: useful to assemble different existing datasets, possibly
@@ -101,6 +104,7 @@ class ConcatDataset(Dataset):
     def __len__(self):
         return self.cumulative_sizes[-1]
 
+    # modificare il get item per far tornare la tripletta img,target,target_aux
     def __getitem__(self, idx):
         dataset_idx = bisect.bisect_right(self.cumulative_sizes, idx)
         if dataset_idx == 0:
@@ -117,7 +121,7 @@ class ConcatDataset(Dataset):
 
 
 
-class Subset(Dataset):
+class Subset(AuxDataset):
     """
     Subset of a dataset at specified indices.
 
@@ -184,18 +188,16 @@ class ChunkSampler(sampler.Sampler):
 if __name__ == '__main__':
     print('Proviamo a fare una gestione del dataset')
 
-    train_size = 55000
-
     transform = transforms.ToTensor()
+    train_size = 60000
 
+    trainset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True))
+    testset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True))
 
-    trainset = Dataset(torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True))
-    testset = Dataset(torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True))
-
-    trainloader = torch.utils.data.DataLoader(dataset=trainset._ds, batch_size=64, shuffle=False,
+    trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=64, shuffle=False,
                                               num_workers=4, sampler=ChunkSampler(train_size, 0))
 
-    testloader = torch.utils.data.DataLoader(dataset=testset._ds, batch_size=64, shuffle=False,
+    testloader = torch.utils.data.DataLoader(dataset=testset, batch_size=64, shuffle=False,
                                              num_workers=4)
 
     # Fare vari test a console
@@ -204,6 +206,16 @@ if __name__ == '__main__':
     plt.imshow(img, cmap="gray")
     plt.show()
 
+    print(trainset._ds.__len__())
+
     print(trainset.__getitem__(9)[0]) # mi restituisce l'item (img, classificazione)
 
-    print(trainset.__getitem__(9)[0])  # mi restituisce l'item [(img, classificazione), y_aux]
+    img = trainset.__getitem__(234)[0][0].numpy().reshape(28, 28)
+    plt.imshow(img, cmap="gray")
+    plt.show()
+
+    print(trainset.__getitem__(234))  # mi restituisce l'item [(img, classificazione), y_aux]
+
+     # se faccio trainloader.dataset[0] mi restituisce la tripletta
+    # ma se faccio trainloader.dataset._ds.__getitem__(0) non mi restituisce l'ultimo y
+    #credo che si debba modificare il get item
