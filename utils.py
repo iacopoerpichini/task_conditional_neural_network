@@ -6,8 +6,9 @@ import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 # SETTINGS MESSI COME PARAMETRI PASSABILI ALLE FUNZIONI ?
+from dataset_menagement import AuxDataset
+
 batch_size = 64
 #     If using CUDA, num_workers should be set to 1 and pin_memory to True. trovato on line
 # num_workers = 4  # number of workers threads ?
@@ -57,6 +58,35 @@ def getMNIST(validation=False, batch_size=64, num_workers=4):
 
     trainset = torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True)
     testset = torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True)
+
+    trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=False,
+                                              num_workers=num_workers, sampler=ChunkSampler(train_size, 0))
+
+    testloader = torch.utils.data.DataLoader(dataset=testset, batch_size=batch_size, shuffle=False,
+                                             num_workers=num_workers)
+
+    if validation:
+        validationloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size, shuffle=False,
+                                                       num_workers=num_workers,
+                                                       sampler=ChunkSampler(validation_size, train_size))
+        return trainloader, validationloader, testloader
+
+    return trainloader, testloader
+
+# funziona allo stesso modo ma carica i dataset con le etichette ausiliarie
+def getMNIST_aux(validation=False, batch_size=64, num_workers=4):
+
+    # Ho visto che molti su questo dataset fanno questa normalazie chiedere a bagda come mai
+    transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))])
+    transform = transforms.ToTensor()
+
+    train_size = 60000
+    if validation:
+        train_size = 55000
+        validation_size = 5000
+
+    trainset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True))
+    testset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True))
 
     trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=False,
                                               num_workers=num_workers, sampler=ChunkSampler(train_size, 0))
@@ -155,11 +185,11 @@ if __name__ == '__main__':  # test di tutte le funzioni implementate
 
     num_img = 5
     testSplitData()
-    train_loader, test_loader = getMNIST(validation=False)
+    train_loader, test_loader = getMNIST(validation=False) # getMNIST_aux(validation=False)
     testStampa(dataloader=train_loader, num_img=num_img)
     testStampa(dataloader=test_loader, num_img=num_img)
 
-    train_loader, validation_loader, test_loader = getMNIST(validation=True)
+    train_loader, validation_loader, test_loader = getMNIST(validation=True) # getMNIST_aux(validation=True)
     testStampa(dataloader=train_loader, num_img=num_img)
     testStampa(dataloader=validation_loader, num_img=num_img)
     testStampa(dataloader=test_loader, num_img=num_img)

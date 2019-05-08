@@ -32,10 +32,10 @@ class AuxDataset(object):
     supporting integer indexing in range from 0 to len(self) exclusive.
     """
     def __init__(self, dataset):
-        self._ds = dataset
+        self._foo = dataset
 
     def __getitem__(self, index):
-        x, y = self._ds[index]
+        x, y = self._foo[index]
         # print(x)
         # print(y)
         y_aux = dict[y]
@@ -46,7 +46,7 @@ class AuxDataset(object):
         raise NotImplementedError
 
     def __len__(self):
-        return self._ds
+        return len(self._foo)
         raise NotImplementedError
 
     def __add__(self, other):
@@ -202,7 +202,8 @@ if __name__ == '__main__':
 
     # Fare vari test a console
 
-    print(trainset._ds.__len__())
+    # mi dice il numero di batch se faccio * 64 il numero tot di elementi
+    print(trainloader.__len__())
 
     img = trainset.__getitem__(9)[0].numpy().reshape(28, 28)
     plt.imshow(img, cmap="gray")

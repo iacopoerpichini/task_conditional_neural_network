@@ -36,6 +36,9 @@ class Net(nn.Module):
         y = F.relu(x) # Mi salvo y dopo la prima convoluzione e dopo il relu prima del max pool per condizionare la rete
         # y = x
         x = self.maxPool2(y)
+
+        # qui passare come parametro il condizionamento
+
         x = F.relu(self.maxPool2(self.conv2(x)))
         x = x.view(in_size, -1)  # flatten the tensor
         x = self.fc1(x)
@@ -50,26 +53,29 @@ class Net(nn.Module):
 
         # beta = self.beta_fc(y)
         # gamma = self.gamma_fc(y)
+        # input_conv2 = parameter_conditioning(y,beta,gamma) # dove dichiarare input_conv2 ?!?!?!?!
         # capire come passare beta e gamma a un custom layer che li rimanda in input a conv 2
 
         # adesso in zeta c'è l'output per classificare, prima dovrei estrarre beta e gamma per condizionare la rete
         z = self.aux_fc3(y)
 
-
-        # DOVREI USARE QUESTO PER IL BIAS?
-        # stdv = 1. / math.sqrt(self.weight.size(1))
-        # self.weight.data.uniform_(-stdv, stdv)
-        # if self.bias is not None:
-        #     self.bias.data.uniform_(-stdv, stdv)
-
-        # gamma = ScaleLayer(gamma)
-
-        # [(1-gamma)*CONV1(IMG) + beta]
-        # CAPIRE COME FARE LA MOLTIPLICAZIONE E PASSARLA IN INPUT AL LAYER CONV2
-
-
         # COME FAR RITORNARE LA TASK LOSS INSIME ALLA LOSS NORMALE?
         return F.log_softmax(x, dim=1), F.log_softmax(z, dim=1)
+
+# Funzione che prende in input output conv 1,bias(beta), scaling parameters(gamma) e restituisce una conv con i
+# parametri condizionati
+def parameter_conditioning(output_conv, bias, scaling_parameters):
+    # DOVREI USARE QUESTO PER IL BIAS?
+    # stdv = 1. / math.sqrt(self.weight.size(1))
+    # self.weight.data.uniform_(-stdv, stdv)
+    # if self.bias is not None:
+    #     self.bias.data.uniform_(-stdv, stdv)
+
+    # gamma = ScaleLayer(gamma)
+
+    # [(1-gamma)*CONV1(IMG) + beta]
+    # CAPIRE COME FARE LA MOLTIPLICAZIONE E PASSARLA IN INPUT AL LAYER CONV2
+    return (bias+((1-scaling_parameters)*output_conv))
 
 
     # def extract_conv1(self, x, avg_pool = True): #ha senso per estrarre l'output dopo la prima convoluzione?

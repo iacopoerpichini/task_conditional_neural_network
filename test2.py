@@ -35,7 +35,7 @@ transform = transforms.ToTensor()
 
 def train(epoch, data_loader):
     model.train()
-    for batch_idx, (data, target, targat_aux) in enumerate(data_loader):
+    for batch_idx, (data, target, target_aux) in enumerate(data_loader):
         if cuda:
             data, target, target_aux = Variable(data.cuda()), Variable(target.cuda()), Variable(target_aux.cuda())
         data, target, target_aux = Variable(data), Variable(target), Variable(target_aux)
@@ -137,7 +137,6 @@ if __name__ == '__main__':
 
         train(epoch, data_loader=trainloader)
         accuracy.append(test(data_loader=testloader))
-
 
 
 
