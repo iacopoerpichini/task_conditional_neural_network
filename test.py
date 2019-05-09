@@ -11,6 +11,8 @@ from timeit import default_timer as timer
 
 # import seaborn as sns
 
+# TEST DIFFERENZA TRA ETICHETTE 0,..,9 E 0,1 CON E SENZA VALIDAZIONE DATI
+
 cuda = torch.cuda.is_available()
 print('Using PyTorch version:', torch.__version__, 'CUDA:', cuda)
 
