@@ -35,8 +35,8 @@ class Net(nn.Module):
         in_size = x.size(0)
         x = self.conv1(x)
         y = F.relu(x) # Mi salvo y dopo la prima convoluzione e dopo il relu prima del max pool per condizionare la rete
-        # y = x
         x = self.maxPool2(y)
+
         # potrei salvarmi y anche qui
 
         # Aux net
@@ -84,9 +84,19 @@ def parameter_conditioning(output_conv, bias, scaling_parameters):
     #
     # [(1-gamma)*CONV1(IMG) + beta]
     # CAPIRE COME FARE LA MOLTIPLICAZIONE E PASSARLA IN INPUT AL LAYER CONV2
+    #output_conv = output_conv.view(output_conv.size(0),-1)
+    bias = bias.reshape(bias.size(0),bias.size(1),1,1)
+    scaling_parameters = scaling_parameters.reshape(scaling_parameters.size(0),scaling_parameters.size(1),1,1) # ho messo i .size sennò l'ultimo batch tava errore
+    # prima devo fare il reshape poi posso fare l'expand_as
+    bias = bias.expand_as(output_conv)
+    scaling_parameters = scaling_parameters.expand_as(output_conv)
+
+    scaling_parameters = 1 - scaling_parameters # qui fa correttamente 1 - gamma
     # le dimensioni sono [64,32] per bias e scaling_parameters e [64,32,13,13] per output_conv
-    print('vediamo cosa c\'é nei parametri')
-    return (bias+((1-scaling_parameters)*output_conv))
+    output_conv = output_conv * scaling_parameters # qui non tornano le dimensioni
+    output_conv = bias + output_conv
+    # print('vediamo cosa c\'é nei parametri')
+    return output_conv
 
 
     # def extract_conv1(self, x, avg_pool = True): #ha senso per estrarre l'output dopo la prima convoluzione?
