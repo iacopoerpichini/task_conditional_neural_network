@@ -49,7 +49,7 @@ def train(epoch, data_loader):
         loss = loss + loss_aux
 
         loss.backward()
-        loss_aux.backward()
+        # loss_aux.backward()
 
         optimizer.step()
         if batch_idx % 10 == 0:
@@ -61,11 +61,10 @@ def test(data_loader):
     model.eval()
     test_loss = 0
     correct = 0
-    for data, target, target_aux in enumerate(data_loader):
+    for batch_idx, (data, target, target_aux) in enumerate(data_loader):
         if cuda:
             data, target, target_aux = Variable(data.cuda()), Variable(target.cuda()), Variable(target_aux.cuda())
         data, target, target_aux = Variable(data), Variable(target), Variable(target_aux)
-        # data, target = Variable(data, volatile=True), Variable(target) vecchia riga
 
         output, output_aux = model(data)
 
@@ -143,12 +142,3 @@ if __name__ == '__main__':
     end = timer()
     print('Execution time in minutes: {:.2f}'.format((end - start) / 60))
 
-    # Stampo grafici
-
-    # x = np.arange(1, epochs + 1)
-    # plt.plot(x, accuracy, '-o', label="accuracy")
-    # plt.legend()
-    # plt.title('not_validate_vs_validate')
-    # plt.xlabel('num_epoch')
-    # plt.ylabel('accuracy_%')
-    # plt.show()

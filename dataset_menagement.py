@@ -216,7 +216,7 @@ if __name__ == '__main__':
     plt.show()
     print(trainset.__getitem__(234))  # mi restituisce l'item [(img, classificazione), y_aux]
 
-     # se faccio trainloader.dataset[0] mi restituisce la tripletta
+    # se faccio trainloader.dataset[0] mi restituisce la tripletta
     # ma se faccio trainloader.dataset._ds.__getitem__(0) non mi restituisce l'ultimo y
     #credo che si debba modificare il get item
 
