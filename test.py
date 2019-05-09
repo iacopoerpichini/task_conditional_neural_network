@@ -185,4 +185,4 @@ if __name__ == '__main__':
     plt.ylabel('accuracy_%')
     plt.show()
 
-#test da 5 epoche circa 11 minuti
+#test da 3 epoche circa 7 minuti
