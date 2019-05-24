@@ -5,8 +5,6 @@ from torch.utils.data import sampler
 import torchvision.transforms as transforms
 import matplotlib.pyplot as plt
 import numpy as np
-
-# SETTINGS MESSI COME PARAMETRI PASSABILI ALLE FUNZIONI ?
 from dataset_menagement import AuxDataset
 
 batch_size = 64
@@ -48,7 +46,7 @@ class ChunkSampler(sampler.Sampler):
 def getMNIST(validation=False, batch_size=64, num_workers=4):
 
     # Ho visto che molti su questo dataset fanno questa normalazie chiedere a bagda come mai
-    transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))])
+    # transform = transforms.Compose([transforms.ToTensor(),transforms.Normalize((0.1307,), (0.3081,))])
     transform = transforms.ToTensor()
 
     train_size = 60000
@@ -85,8 +83,8 @@ def getMNIST_aux(validation=False, batch_size=64, num_workers=4):
         train_size = 55000
         validation_size = 5000
 
-    trainset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True))
-    testset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True))
+    trainset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=True, transform=transform, download=True),name='mnist')
+    testset = AuxDataset(torchvision.datasets.MNIST(root='./data', train=False, transform=transform, download=True),name='mnist')
 
     trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=False,
                                               num_workers=num_workers, sampler=ChunkSampler(train_size, 0))
@@ -113,8 +111,8 @@ def getCIFRAR10_aux(validation=False, batch_size=64, num_workers=4):
         train_size = 45000
         validation_size = 5000
 
-    trainset = AuxDataset(torchvision.datasets.CIFAR10(root='./data', train=True, transform=transform, download=True))
-    testset = AuxDataset(torchvision.datasets.CIFAR10(root='./data', train=False, transform=transform, download=True))
+    trainset = AuxDataset(torchvision.datasets.CIFAR10(root='./data', train=True, transform=transform, download=True),name='cifar10')
+    testset = AuxDataset(torchvision.datasets.CIFAR10(root='./data', train=False, transform=transform, download=True),name='cifar10')
 
     trainloader = torch.utils.data.DataLoader(dataset=trainset, batch_size=batch_size, shuffle=False,
                                               num_workers=num_workers, sampler=ChunkSampler(train_size, 0))
@@ -208,16 +206,16 @@ if __name__ == '__main__':  # test di tutte le funzioni implementate
 
     trainloader, testloader = getCIFRAR10_aux(validation=False)
 
-    # train_loader, test_loader = getMNIST(validation=False)
-    # extract_aux_target_from_loader(train_loader)
-    #
-    # num_img = 5
-    # testSplitData()
-    # train_loader, test_loader = getMNIST(validation=False) # getMNIST_aux(validation=False)
-    # testStampa(dataloader=train_loader, num_img=num_img)
-    # testStampa(dataloader=test_loader, num_img=num_img)
-    #
-    # train_loader, validation_loader, test_loader = getMNIST(validation=True) # getMNIST_aux(validation=True)
-    # testStampa(dataloader=train_loader, num_img=num_img)
-    # testStampa(dataloader=validation_loader, num_img=num_img)
-    # testStampa(dataloader=test_loader, num_img=num_img)
+    train_loader, test_loader = getMNIST(validation=False)
+    extract_aux_target_from_loader(train_loader)
+
+    num_img = 5
+    testSplitData()
+    train_loader, test_loader = getMNIST(validation=False) # getMNIST_aux(validation=False)
+    testStampa(dataloader=train_loader, num_img=num_img)
+    testStampa(dataloader=test_loader, num_img=num_img)
+
+    train_loader, validation_loader, test_loader = getMNIST(validation=True) # getMNIST_aux(validation=True)
+    testStampa(dataloader=train_loader, num_img=num_img)
+    testStampa(dataloader=validation_loader, num_img=num_img)
+    testStampa(dataloader=test_loader, num_img=num_img)

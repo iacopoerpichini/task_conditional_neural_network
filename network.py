@@ -2,39 +2,43 @@ from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math
-
-# !---- settings
-
-kernel_size = 3
-input_ch = 3 # usare 1 per MNIST 3 per CIFAR10
-fc_net = 3136  # usare 2304 per MNIST 3136 per CIFAR10
-fc_aux_net = 32  # usare 32 per MNIST 128 per CIFAR10
-global_avg_pool_stride = 32 # usare 28 per MNIST 32 per CIFAR10
-
-# !---- end settings
 
 class Net(nn.Module):
 
-    def __init__(self):
+    def __init__(self,dataset_name,conditioning=False):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(input_ch, 32, kernel_size=kernel_size, padding=1)
-        self.maxPool1 = nn.MaxPool2d(kernel_size=kernel_size, stride=2) # stride = 2,3?
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=kernel_size, padding=1)
-        self.maxPool2 = nn.MaxPool2d(kernel_size=kernel_size, stride=2)
-        self.fc1 = nn.Linear(fc_net, 1024)
+
+        # variabili per setting
+        self._dataset_name = dataset_name # di default mnist
+        self._kernel_size = 3
+        self._conditioning = conditioning
+        if (self._dataset_name == 'mnist'):
+            self._input_ch = 1  # usare 1 per MNIST 3 per CIFAR10
+            self._fc_net = 2304  # usare 2304 per MNIST 3136 per CIFAR10
+            self._global_avg_pool_stride = 28  # usare 28 per MNIST 32 per CIFAR10
+        # controllo che dataset è
+        if (self._dataset_name == 'cifar10'):
+            self._input_ch = 3
+            self._fc_net = 3136
+            self._global_avg_pool_stride = 32  # usare 28 per MNIST 32 per CIFAR10
+
+        # net
+        self.conv1 = nn.Conv2d(self._input_ch, 32, kernel_size=self._kernel_size, padding=1)
+        self.maxPool1 = nn.MaxPool2d(kernel_size=self._kernel_size, stride=2) # stride = 2,3?
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=self._kernel_size, padding=1)
+        self.maxPool2 = nn.MaxPool2d(kernel_size=self._kernel_size, stride=2)
+        self.fc1 = nn.Linear(self._fc_net, 1024)
         self.fc1_drop = nn.Dropout(0.2)
         self.fc2 = nn.Linear(1024, 128)
         self.fc2_drop = nn.Dropout(0.2)
 
         # Aux net
-        self.globalAvgPool = nn.AvgPool2d(kernel_size=kernel_size, stride=32)
-        self.feat_fc1 = nn.Linear(fc_aux_net,64)
+        self.globalAvgPool = nn.AvgPool2d(kernel_size=self._kernel_size, stride=self._global_avg_pool_stride)
+        self.feat_fc1 = nn.Linear(32,64)
         self.feat_fc2 = nn.Linear(64,64)
-
         self.aux_fc3 = nn.Linear(64,128)
-
-        self.beta_fc = nn.Linear(64,32) # DOVREBBERO RIENTRARE 32 FEATURES A CONV 2 COME PARAMETRI? no pensare bene come fare per trasformare array in matrice metodo expand as consigliato prof
+        # parametri per condizionare
+        self.beta_fc = nn.Linear(64,32)
         self.gamma_fc = nn.Linear(64,32)
 
     def forward(self, x):
@@ -47,7 +51,6 @@ class Net(nn.Module):
 
         # Aux net
         y = self.globalAvgPool(y)
-        # da controllare con il professore se ha senso
         y_size = y.size(0) # modifico il tensore per darlo ai due livelli fc
         y = y.view(y_size,-1)
         y = self.feat_fc1(y)
@@ -55,9 +58,10 @@ class Net(nn.Module):
 
         beta = self.beta_fc(y)
         gamma = self.gamma_fc(y)
-        # capire come passare beta e gamma a un custom layer che li rimanda in input a conv 2
-        # qui passare come parametro il condizionamento
-        x = parameter_conditioning(x, beta, gamma) # qui x è img 13*13*32 credo vedere come gestire beta e gamma
+
+        # RIGA PER IL CONDIZIONAMENTO DEI PARAMETRI !---------------!
+        if(self._conditioning):
+            x = parameter_conditioning(x, beta, gamma) # qui x è img 13*13*32 credo vedere come gestire beta e gamma
 
         x = F.relu(self.maxPool2(self.conv2(x)))
         x = x.view(in_size, -1)  # flatten the tensor
@@ -70,8 +74,9 @@ class Net(nn.Module):
         z = self.aux_fc3(y)
         # z = z.reshape(64,32,128) # lui que aveva un tensore [64,32,1,128] cosi lo fa [64,32,128] non capisco da dove arriva il 32 # dovrei aver risolto
         # dovrebbe essere [64,128]
-
         loss, task_loss = F.log_softmax(x, dim=1), F.log_softmax(z, dim=1)
+        if(self._conditioning == False):
+            task_loss = task_loss*0
         return loss, task_loss
 
 # Funzione che prende in input output conv 1,bias(beta), scaling parameters(gamma) e restituisce una conv con i
@@ -89,7 +94,7 @@ def parameter_conditioning(output_conv, bias, scaling_parameters):
     # CAPIRE COME FARE LA MOLTIPLICAZIONE E PASSARLA IN INPUT AL LAYER CONV2
     #output_conv = output_conv.view(output_conv.size(0),-1)
     bias = bias.reshape(bias.size(0),bias.size(1),1,1)
-    scaling_parameters = scaling_parameters.reshape(scaling_parameters.size(0),scaling_parameters.size(1),1,1) # ho messo i .size sennò l'ultimo batch tava errore
+    scaling_parameters = scaling_parameters.reshape(scaling_parameters.size(0),scaling_parameters.size(1),1,1) # ho messo i .size sennò l'ultimo batch dava errore
     # prima devo fare il reshape poi posso fare l'expand_as
     bias = bias.expand_as(output_conv)
     scaling_parameters = scaling_parameters.expand_as(output_conv)
@@ -124,10 +129,7 @@ def parameter_conditioning(output_conv, bias, scaling_parameters):
     #         labels.append(target)
     #     return (torch.cat(conv1), torch.cat(labels)) #con cat concateno i tensori
 
-# DOVREI USARE QUESTA CLASSE PER SCALARE I PARAMETRI Y
-# [(1-Y)*CONV1(IMG) + Bias]
 
-# non l'ho utilizzata poi
 class ScaleLayer(nn.Module):
 
    def __init__(self, init_value=1e-3):

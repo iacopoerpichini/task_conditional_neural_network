@@ -11,18 +11,7 @@ import warnings
 from torch._utils import _accumulate
 from torch import randperm
 
-dict = { # Classificazione ausiliaria per ora a caso
-        0: 0,
-        1: 1,
-        2: 0,
-        3: 1,
-        4: 1,
-        5: 1,
-        6: 1,
-        7: 0,
-        8: 0,
-        9: 0
-    }
+
 
 class AuxDataset(object):
     """An abstract class representing a Dataset.
@@ -31,11 +20,38 @@ class AuxDataset(object):
     ``__len__``, that provides the size of the dataset, and ``__getitem__``,
     supporting integer indexing in range from 0 to len(self) exclusive.
     """
-    def __init__(self, dataset):
+    def __init__(self, dataset, name=''):
         self._foo = dataset
+        self._name = name
 
     def __getitem__(self, index):
         x, y = self._foo[index]
+        if (self._name == 'mnist'):
+            dict = {  # Classificazione ausiliaria per ora a caso sia per cifar10 che per mnist
+                0: 0,
+                1: 1,
+                2: 0,
+                3: 1,
+                4: 1,
+                5: 1,
+                6: 1,
+                7: 0,
+                8: 0,
+                9: 0
+            }
+        if (self._name == 'cifar10'):
+            dict = {  # Classificazione ausiliaria per ora a caso sia per cifar10 che per mnist
+                0: 0,  # airplane
+                1: 0,  # automobile
+                2: 1,  # bird
+                3: 0,  # cat
+                4: 0,  # deer
+                5: 1,  # dog
+                6: 0,  # frog
+                7: 1,  # horse
+                8: 0,  # ship
+                9: 1  # truck
+            }
         # print(x)
         # print(y)
         y_aux = dict[y]
