@@ -26,7 +26,7 @@ class AuxDataset(object):
 
     def __getitem__(self, index):
         x, y = self._foo[index]
-        if (self._name == 'mnist'):
+        if (self._name == 'mnist'):# PRIMO TERZO DIZIONARIO AUSILIARIO PER CIFAR10
             dict = {  # Classificazione ausiliaria per ora a caso sia per cifar10 che per mnist
                 0: 0,
                 1: 1,
@@ -39,16 +39,42 @@ class AuxDataset(object):
                 8: 0,
                 9: 0
             }
-        if (self._name == 'cifar10'):
+        # if (self._name == 'cifar10'): # SECONDO DIZIONARIO AUSILIARIO PER CIFAR10
+        #     dict = {  # Classificazione ausiliaria per ora a caso sia per cifar10 che per mnist
+        #         0: 0,  # airplane
+        #         1: 0,  # automobile
+        #         2: 1,  # bird
+        #         3: 0,  # cat
+        #         4: 0,  # deer
+        #         5: 1,  # dog
+        #         6: 0,  # frog
+        #         7: 1,  # horse
+        #         8: 0,  # ship
+        #         9: 1  # truck
+        #     }
+        # if (self._name == 'cifar10'): # TERZO DIZIONARIO AUSILIARIO PER CIFAR10
+        #     dict = {  # Classificazione ausiliaria per ora a caso sia per cifar10 che per mnist
+        #         0: 0,  # airplane
+        #         1: 1,  # automobile
+        #         2: 1,  # bird
+        #         3: 0,  # cat
+        #         4: 1,  # deer
+        #         5: 2,  # dog
+        #         6: 5,  # frog
+        #         7: 4,  # horse
+        #         8: 0,  # ship
+        #         9: 2  # truck
+        #     }
+        if (self._name == 'cifar10'): # QUARTO DIZIONARIO AUSILIARIO PER CIFAR10
             dict = {  # Classificazione ausiliaria per ora a caso sia per cifar10 che per mnist
                 0: 0,  # airplane
                 1: 0,  # automobile
                 2: 1,  # bird
                 3: 0,  # cat
-                4: 0,  # deer
-                5: 1,  # dog
+                4: 1,  # deer
+                5: 2,  # dog
                 6: 0,  # frog
-                7: 1,  # horse
+                7: 3,  # horse
                 8: 0,  # ship
                 9: 1  # truck
             }

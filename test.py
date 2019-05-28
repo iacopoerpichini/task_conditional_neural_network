@@ -19,11 +19,13 @@ print('Using PyTorch version:', torch.__version__, 'CUDA:', cuda)
 
 batch_size = 64 # Dimensione del batch
 
-dataset_name = 'mnist' # 'cifar10'
+dataset_name = 'cifar10'
 
-model = Net(dataset_name,conditioning=False)
+#dataset_name = 'mnist'
 
-epochs = 3 # Numero di epoche di addestramento # ottimali 5 per mnist 15 per cifar10
+model = Net(dataset_name,conditioning=True)
+
+epochs = 15 # Numero di epoche di addestramento # ottimali 5 per mnist 15 per cifar10
 
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
@@ -119,7 +121,10 @@ if __name__ == '__main__':
 
     for epoch in range(0, epochs):
         train(epoch, data_loader=trainloader)
-        accuracy.append(test(data_loader=testloader))
+        if (model._conditioning == False):
+            accuracy.append(test(data_loader=testloader))
+        elif (model._conditioning == True):
+            accuracy_conditioned.append(test(data_loader=testloader))
 
     end = timer()
     print('Execution time in minutes: {:.2f}\n'.format((end - start) / 60))
@@ -128,7 +133,10 @@ if __name__ == '__main__':
     # Stampo grafici
 
     x = np.arange(1, epochs + 1)
-    plt.plot(x, accuracy, label="accuracy")
+    if (model._conditioning == False):
+        plt.plot(x, accuracy, label="accuracy")
+    elif (model._conditioning == True):
+        plt.plot(x, accuracy_conditioned, label="accuracy")
     # plt.plot(x, accuracy_conditioned, label="whit conditioned network", linestyle='--')
     plt.legend()
     if (model._conditioning):
