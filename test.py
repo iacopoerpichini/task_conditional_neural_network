@@ -19,13 +19,13 @@ print('Using PyTorch version:', torch.__version__, 'CUDA:', cuda)
 
 batch_size = 64 # Dimensione del batch
 
-dataset_name = 'cifar10'
+#dataset_name = 'cifar10'
 
-#dataset_name = 'mnist'
+dataset_name = 'mnist'
 
 model = Net(dataset_name,conditioning=True)
 
-epochs = 15 # Numero di epoche di addestramento # ottimali 5 per mnist 15 per cifar10
+epochs = 5 # Numero di epoche di addestramento # ottimali 5 per mnist 15 per cifar10
 
 optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.5)
 
